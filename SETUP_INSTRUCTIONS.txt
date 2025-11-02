@@ -1,0 +1,125 @@
+═══════════════════════════════════════════════════════════════
+  TOPOVIS - SETUP INSTRUCTIONS FOR EVALUATOR
+═══════════════════════════════════════════════════════════════
+
+Hello! Thank you for evaluating this project.
+This is a React + TypeScript web application.
+
+──────────────────────────────────────────────────────────────
+  PREREQUISITES
+──────────────────────────────────────────────────────────────
+
+You need Node.js installed on your system:
+• Download from: https://nodejs.org/
+• Recommended version: v18 or higher
+• Includes npm (Node Package Manager)
+
+Check if installed:
+  node --version
+  npm --version
+
+──────────────────────────────────────────────────────────────
+  INSTALLATION & RUNNING (3 Simple Steps)
+──────────────────────────────────────────────────────────────
+
+1. EXTRACT the ZIP file to any folder
+
+2. OPEN Command Prompt or Terminal in the extracted folder
+
+3. RUN these commands:
+
+   # Install dependencies (first time only, takes 2-3 minutes)
+   npm install
+
+   # Start the development server
+   npm run dev
+
+4. OPEN your browser and go to:
+   http://localhost:XXXX
+
+   The application will open automatically!
+
+──────────────────────────────────────────────────────────────
+  QUICK DEMO
+──────────────────────────────────────────────────────────────
+
+Once the app is running:
+
+1. Click "Example Graphs" dropdown
+2. Select "Course Prerequisites"
+3. Click "Play" button
+4. Watch the algorithm visualize step-by-step!
+
+Try these features:
+• Back/Next buttons - Step through manually
+• Example Graphs - Load different pre-made graphs
+• Generate Random DAG - Create random graph
+• Queue/Stack Panel - See data structures in action
+• Speed slider - Adjust animation speed
+• Algorithm selector - Try Kahn's vs DFS
+
+──────────────────────────────────────────────────────────────
+  FEATURES IMPLEMENTED
+──────────────────────────────────────────────────────────────
+
+✅ Kahn's Algorithm (BFS) with in-degree removal animation
+✅ DFS-based Topological Sort with finishing times
+✅ In-degree shown and updated dynamically on nodes
+✅ Data structure visualization (Queue for Kahn, Stack for DFS)
+✅ Play/Pause/Step Forward/Step Backward controls
+✅ Cycle detection with explanation
+✅ 5 Example graphs (1 cyclic) - Click "Example Graphs" dropdown
+✅ Algorithm complexity information panel (O(V + E))
+
+Novelty Features:
+✅ Multiple pre-loaded example graphs
+✅ Real-time Queue/Stack visualization
+✅ Step backward functionality
+✅ Enhanced execution log with color coding
+✅ Interactive graph editor
+✅ Export/Import graphs as JSON
+
+──────────────────────────────────────────────────────────────
+  TO STOP THE SERVER
+──────────────────────────────────────────────────────────────
+
+Press Ctrl + C in the terminal where the server is running
+
+──────────────────────────────────────────────────────────────
+  PROJECT DETAILS
+──────────────────────────────────────────────────────────────
+
+Technology Stack:
+• React 18 (UI Framework)
+• TypeScript (Type Safety)
+• Vite (Build Tool)
+• React Flow (Graph Visualization)
+• Framer Motion (Animations)
+• Tailwind CSS (Styling)
+
+All code is in the /src folder
+• /src/algorithms - Algorithm implementations
+• /src/components - React components
+• /src/utils - Utility functions and example graphs
+
+For detailed documentation, see README.md
+
+──────────────────────────────────────────────────────────────
+  TESTED ON
+──────────────────────────────────────────────────────────────
+
+✅ Windows 10/11
+✅ Node.js v18+
+✅ Chrome, Firefox, Edge browsers
+✅ 1920x1080 resolution (100% zoom recommended)
+
+──────────────────────────────────────────────────────────────
+  CONTACT
+──────────────────────────────────────────────────────────────
+
+If you encounter any issues, please check README.md for more
+detailed informatioN
+
+Thank you for your time!
+
+═══════════════════════════════════════════════════════════════
