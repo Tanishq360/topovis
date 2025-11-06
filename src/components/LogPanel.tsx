@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { AlgorithmStep } from '../types';
 
@@ -8,11 +8,7 @@ interface LogPanelProps {
 }
 
 export const LogPanel: React.FC<LogPanelProps> = ({ steps, currentStep }) => {
-  const logEndRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    logEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [currentStep]);
+  // Auto-scroll disabled to allow viewing queue/stack panel during execution
 
   return (
     <motion.div
@@ -77,7 +73,6 @@ export const LogPanel: React.FC<LogPanelProps> = ({ steps, currentStep }) => {
             </motion.div>
           ))
         )}
-        <div ref={logEndRef} />
       </div>
     </motion.div>
   );
