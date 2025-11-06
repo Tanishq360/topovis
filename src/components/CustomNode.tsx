@@ -8,6 +8,7 @@ interface CustomNodeData {
   state: NodeState;
   inDegree?: number;
   showInDegree?: boolean;
+  deleteMode?: boolean;
 }
 
 const stateColors: Record<NodeState, string> = {
@@ -40,6 +41,7 @@ export const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data }) => {
           border-4 font-bold text-white text-xl
           ${stateColors[data.state]}
           ${stateGlow[data.state]}
+          ${data.deleteMode ? 'cursor-pointer hover:!bg-red-600 hover:!border-red-500 hover:ring-4 hover:ring-red-400/50' : ''}
           transition-all duration-300
         `}
         animate={{

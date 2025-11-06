@@ -1,12 +1,13 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Plus, Shuffle, Upload, Download, Info, SkipForward, SkipBack } from 'lucide-react';
+import { Play, Pause, RotateCcw, Plus, Shuffle, Upload, Download, Info, SkipForward, SkipBack, Trash2 } from 'lucide-react';
 import { Algorithm } from '../types';
 
 interface ControlPanelProps {
   algorithm: Algorithm;
   isPlaying: boolean;
   speed: number;
+  deleteMode: boolean;
   onAlgorithmChange: (algo: Algorithm) => void;
   onPlay: () => void;
   onPause: () => void;
@@ -20,6 +21,7 @@ interface ControlPanelProps {
   onExport: () => void;
   onImport: () => void;
   onHelp: () => void;
+  onToggleDeleteMode: () => void;
   disabled?: boolean;
   canStepBack?: boolean;
 }
@@ -28,6 +30,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   algorithm,
   isPlaying,
   speed,
+  deleteMode,
   onAlgorithmChange,
   onPlay,
   onPause,
@@ -41,6 +44,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onExport,
   onImport,
   onHelp,
+  onToggleDeleteMode,
   disabled = false,
   canStepBack = false,
 }) => {
@@ -156,15 +160,27 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="flex flex-col gap-2">
           <button
             onClick={onAddNode}
-            disabled={isPlaying}
+            disabled={isPlaying || deleteMode}
             className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded flex items-center justify-center gap-2 transition-colors"
           >
             <Plus size={18} />
             Add Node
           </button>
           <button
-            onClick={onGenerateRandom}
+            onClick={onToggleDeleteMode}
             disabled={isPlaying}
+            className={`${
+              deleteMode
+                ? 'bg-red-600 hover:bg-red-700 ring-2 ring-red-400'
+                : 'bg-gray-600 hover:bg-gray-700'
+            } disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded flex items-center justify-center gap-2 transition-all`}
+          >
+            <Trash2 size={18} />
+            {deleteMode ? '✓ Delete Mode ON' : 'Delete Mode'}
+          </button>
+          <button
+            onClick={onGenerateRandom}
+            disabled={isPlaying || deleteMode}
             className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded flex items-center justify-center gap-2 transition-colors"
           >
             <Shuffle size={18} />

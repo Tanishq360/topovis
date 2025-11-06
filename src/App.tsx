@@ -40,6 +40,7 @@ function App() {
   const [showHelp, setShowHelp] = useState(false);
   const [topologicalOrder, setTopologicalOrder] = useState<string[]>([]);
   const [nodeCounter, setNodeCounter] = useState(0);
+  const [deleteMode, setDeleteMode] = useState(false);
 
   const nodeLabels = useMemo(() => {
     const map = new Map<string, string>();
@@ -178,6 +179,28 @@ function App() {
       runAlgorithm();
     }
   }, [currentStep, steps, applyStep, runAlgorithm]);
+
+  // Handle node click in delete mode
+  const handleNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    if (deleteMode) {
+      event.stopPropagation();
+      setNodes((nds) => nds.filter((n) => n.id !== node.id));
+      setEdges((eds) => eds.filter((e) => e.source !== node.id && e.target !== node.id));
+    }
+  }, [deleteMode, setNodes, setEdges]);
+
+  // Handle edge click in delete mode
+  const handleEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+    if (deleteMode) {
+      event.stopPropagation();
+      setEdges((eds) => eds.filter((e) => e.id !== edge.id));
+    }
+  }, [deleteMode, setEdges]);
+
+  // Toggle delete mode
+  const toggleDeleteMode = useCallback(() => {
+    setDeleteMode((prev) => !prev);
+  }, []);
 
   // Step backward
   const stepBackward = useCallback(() => {
@@ -354,41 +377,44 @@ function App() {
   // Handle edge connection
   const onConnect = useCallback(
     (connection: Connection) => {
-      const newEdge = {
-        ...connection,
-        id: `edge-${connection.source}-${connection.target}`,
-        animated: false,
-        style: { stroke: '#64748b' },
-        markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' },
-      };
+      if (deleteMode) return; // Don't add edges in delete mode
+      setEdges((eds) => {
+        const newEdge: Edge = {
+          ...connection,
+          id: `e${connection.source}-${connection.target}`,
+          animated: false,
+          style: { stroke: '#64748b' },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' },
+        } as Edge;
+        
+        // Update in-degrees after adding edge
+        setTimeout(() => {
+          const inDegrees = calculateInDegrees(
+            nodes.map(n => ({
+              id: n.id,
+              label: n.data.label,
+              state: 'unvisited',
+              inDegree: 0,
+              position: n.position,
+            })),
+            [...eds, newEdge].map(e => ({ id: e.id!, source: e.source!, target: e.target! }))
+          );
 
-      setEdges((eds) => addEdge(newEdge, eds));
-
-      // Recalculate in-degrees
-      setTimeout(() => {
-        const inDegrees = calculateInDegrees(
-          nodes.map(n => ({
-            id: n.id,
-            label: n.data.label,
-            state: 'unvisited',
-            inDegree: 0,
-            position: n.position,
-          })),
-          [...edges, newEdge].map(e => ({ id: e.id!, source: e.source!, target: e.target! }))
-        );
-
-        setNodes((nds) =>
-          nds.map((node) => ({
-            ...node,
-            data: {
-              ...node.data,
-              inDegree: inDegrees[node.id] || 0,
-            },
-          }))
-        );
-      }, 0);
+          setNodes((nds) =>
+            nds.map((node) => ({
+              ...node,
+              data: {
+                ...node.data,
+                inDegree: inDegrees[node.id] || 0,
+              },
+            }))
+          );
+        }, 0);
+        
+        return addEdge(newEdge, eds);
+      });
     },
-    [setEdges, nodes, edges, setNodes]
+    [setEdges, nodes, edges, setNodes, deleteMode]
   );
 
   // Handle export
@@ -495,6 +521,7 @@ function App() {
             algorithm={algorithm}
             isPlaying={isPlaying}
             speed={speed}
+            deleteMode={deleteMode}
             onAlgorithmChange={setAlgorithm}
             onPlay={() => {
               if (steps.length === 0) {
@@ -514,6 +541,7 @@ function App() {
             onExport={handleExport}
             onImport={handleImport}
             onHelp={() => setShowHelp(true)}
+            onToggleDeleteMode={toggleDeleteMode}
             disabled={nodes.length === 0}
             canStepBack={currentStep > -1}
           />
@@ -523,11 +551,26 @@ function App() {
         <div className="flex-1 flex flex-col gap-3 min-w-0">
           <div className="flex-1 bg-dark-card border border-dark-border rounded-lg overflow-hidden min-h-0">
             <ReactFlow
-              nodes={nodes}
-              edges={edges}
+              nodes={nodes.map(node => ({
+                ...node,
+                data: {
+                  ...node.data,
+                  deleteMode,
+                },
+              }))}
+              edges={edges.map(edge => ({
+                ...edge,
+                style: {
+                  ...edge.style,
+                  cursor: deleteMode ? 'pointer' : 'default',
+                },
+                className: deleteMode ? 'hover:!stroke-red-500 hover:!stroke-[3px] transition-all' : '',
+              }))}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
+              onNodeClick={handleNodeClick}
+              onEdgeClick={handleEdgeClick}
               nodeTypes={nodeTypes}
               fitView
               minZoom={0.5}
