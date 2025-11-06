@@ -35,6 +35,7 @@ export function kahnsAlgorithm(
     message: `Starting Kahn's Algorithm. Found ${queue.length} node(s) with in-degree 0: ${queue.map(id => nodeMap.get(id)?.label).join(', ')}`,
     inDegrees: Object.fromEntries(inDegree),
     queue: [...queue],
+    codeLine: 6, // if in-degree[v] == 0: enqueue v
   });
 
   while (queue.length > 0) {
@@ -47,6 +48,7 @@ export function kahnsAlgorithm(
       message: `Processing node ${nodeLabel} (in-degree: 0)`,
       inDegrees: Object.fromEntries(inDegree),
       queue: [...queue],
+      codeLine: 8, // u = dequeue from Q
     });
 
     result.push(currentNode);
@@ -65,6 +67,7 @@ export function kahnsAlgorithm(
         message: `Updated in-degree of ${neighborLabel}: ${currentInDegree} → ${currentInDegree - 1}`,
         inDegrees: Object.fromEntries(inDegree),
         queue: [...queue],
+        codeLine: 11, // decrease in-degree[v] by 1
       });
 
       if (inDegree.get(neighbor) === 0) {
@@ -75,6 +78,7 @@ export function kahnsAlgorithm(
           message: `Added ${neighborLabel} to queue (in-degree now 0)`,
           inDegrees: Object.fromEntries(inDegree),
           queue: [...queue],
+          codeLine: 13, // enqueue v to Q
         });
       }
     });
@@ -86,6 +90,7 @@ export function kahnsAlgorithm(
       result: [...result],
       inDegrees: Object.fromEntries(inDegree),
       queue: [...queue],
+      codeLine: 9, // add u to result
     });
   }
 
@@ -95,12 +100,14 @@ export function kahnsAlgorithm(
       type: 'complete',
       message: `⚠️ Cycle detected! Only processed ${result.length} out of ${nodes.length} nodes. Topological sort not possible.`,
       result,
+      codeLine: 17, // return error (cycle detected)
     });
   } else {
     steps.push({
       type: 'complete',
       message: `✓ Topological sort complete! Order: ${result.map(id => nodeMap.get(id)?.label).join(' → ')}`,
       result,
+      codeLine: 15, // return result (success)
     });
   }
 

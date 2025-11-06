@@ -24,11 +24,11 @@ export const DataStructurePanel: React.FC<DataStructurePanelProps> = ({
     <div className="bg-dark-card border border-dark-border rounded-lg p-3 h-full">
       <h3 className="text-base font-bold text-white mb-2">{title}</h3>
       
-      <div className="bg-dark-bg rounded-lg p-2 min-h-[120px]">
+      <div className="bg-dark-bg rounded-lg p-2 h-[140px] flex items-center justify-center">
         {items.length === 0 ? (
-          <p className="text-gray-500 text-sm text-center py-8">{emptyMessage}</p>
+          <p className="text-gray-500 text-sm text-center">{emptyMessage}</p>
         ) : (
-          <div className={`flex ${isKahn ? 'flex-row' : 'flex-col-reverse'} gap-2 ${isKahn ? 'overflow-x-auto' : ''}`}>
+          <div className={`flex ${isKahn ? 'flex-row' : 'flex-col-reverse'} gap-2 w-full h-full ${isKahn ? 'overflow-x-auto' : 'overflow-y-auto'} p-1`}>
             <AnimatePresence>
               {items.map((nodeId, index) => {
                 const label = nodeLabels.get(nodeId) || nodeId;

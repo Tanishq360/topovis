@@ -19,6 +19,7 @@ import { HelpModal } from './components/HelpModal';
 import { TopologicalOrderDisplay } from './components/TopologicalOrderDisplay';
 import { DataStructurePanel } from './components/DataStructurePanel';
 import { AlgorithmInfo } from './components/AlgorithmInfo';
+import { PseudocodePanel } from './components/PseudocodePanel';
 import { Algorithm, AlgorithmStep, GraphNode, GraphEdge } from './types';
 import { kahnsAlgorithm } from './algorithms/kahn';
 import { dfsTopologicalSort } from './algorithms/dfs';
@@ -41,6 +42,7 @@ function App() {
   const [topologicalOrder, setTopologicalOrder] = useState<string[]>([]);
   const [nodeCounter, setNodeCounter] = useState(0);
   const [deleteMode, setDeleteMode] = useState(false);
+  const [showPseudocode, setShowPseudocode] = useState(false);
 
   const nodeLabels = useMemo(() => {
     const map = new Map<string, string>();
@@ -321,8 +323,8 @@ function App() {
       source: edge.source,
       target: edge.target,
       animated: false,
-      style: { stroke: '#64748b' },
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' },
+      style: { stroke: '#94a3b8', strokeWidth: 2.5 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8', width: 25, height: 25 },
     }));
 
     setNodes(flowNodes);
@@ -359,8 +361,8 @@ function App() {
       source: edge.source,
       target: edge.target,
       animated: false,
-      style: { stroke: '#64748b' },
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' },
+      style: { stroke: '#94a3b8', strokeWidth: 2.5 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8', width: 25, height: 25 },
     }));
 
     setNodes(flowNodes);
@@ -383,8 +385,8 @@ function App() {
           ...connection,
           id: `e${connection.source}-${connection.target}`,
           animated: false,
-          style: { stroke: '#64748b' },
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' },
+          style: { stroke: '#94a3b8', strokeWidth: 2.5 },
+          markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8', width: 25, height: 25 },
         } as Edge;
         
         // Update in-degrees after adding edge
@@ -480,8 +482,8 @@ function App() {
               source: edge.source,
               target: edge.target,
               animated: false,
-              style: { stroke: '#64748b' },
-              markerEnd: { type: MarkerType.ArrowClosed, color: '#64748b' },
+              style: { stroke: '#94a3b8', strokeWidth: 2.5 },
+              markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8', width: 25, height: 25 },
             }));
 
             setNodes(flowNodes);
@@ -598,12 +600,47 @@ function App() {
               />
             </div>
 
-            {/* Log Panel - Fixed height */}
-            <div className="h-96">
-              <LogPanel
-                steps={steps}
-                currentStep={currentStep}
-              />
+            {/* Log Panel / Pseudocode - Fixed height with toggle */}
+            <div className="h-96 flex flex-col">
+              {/* Toggle Buttons */}
+              <div className="flex gap-2 mb-2">
+                <button
+                  onClick={() => setShowPseudocode(false)}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                    !showPseudocode
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'bg-dark-card text-gray-400 hover:bg-dark-bg border border-dark-border'
+                  }`}
+                >
+                  📝 Execution Log
+                </button>
+                <button
+                  onClick={() => setShowPseudocode(true)}
+                  className={`flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                    showPseudocode
+                      ? 'bg-blue-600 text-white shadow-lg'
+                      : 'bg-dark-card text-gray-400 hover:bg-dark-bg border border-dark-border'
+                  }`}
+                >
+                  💻 Pseudocode
+                </button>
+              </div>
+              
+              {/* Content */}
+              <div className="flex-1 min-h-0">
+                {showPseudocode ? (
+                  <PseudocodePanel
+                    algorithm={algorithm}
+                    currentStep={currentStep}
+                    steps={steps}
+                  />
+                ) : (
+                  <LogPanel
+                    steps={steps}
+                    currentStep={currentStep}
+                  />
+                )}
+              </div>
             </div>
 
             {/* Algorithm Info - Fixed height */}

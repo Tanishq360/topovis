@@ -24,6 +24,7 @@ export interface AlgorithmStep {
   queue?: string[];  // For Kahn's algorithm
   stack?: string[];  // For DFS algorithm
   result?: string[];
+  codeLine?: number; // Line number in pseudocode being executed
 }
 
 export type Algorithm = 'kahn' | 'dfs';

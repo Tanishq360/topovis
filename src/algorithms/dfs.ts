@@ -25,6 +25,7 @@ export function dfsTopologicalSort(
     type: 'select',
     message: 'Starting DFS-based Topological Sort. Will explore all nodes and push to stack after visiting neighbors.',
     stack: [],
+    codeLine: 0, // function dfsTopologicalSort
   });
 
   function dfs(nodeId: string): void {
@@ -39,6 +40,7 @@ export function dfsTopologicalSort(
         nodeId,
         message: `⚠️ Cycle detected! Node ${nodeLabel} is already in recursion stack.`,
         stack: [...stack],
+        codeLine: 12, // if node in visiting: return false (cycle)
       });
       return;
     }
@@ -55,6 +57,7 @@ export function dfsTopologicalSort(
       nodeId,
       message: `Exploring node ${nodeLabel}...`,
       stack: [...stack],
+      codeLine: 16, // add node to visiting
     });
 
     const neighbors = adjList.get(nodeId) || [];
@@ -75,6 +78,7 @@ export function dfsTopologicalSort(
           nodeId: neighbor,
           message: `Visiting neighbor ${neighborLabel} from ${nodeLabel}`,
           stack: [...stack],
+          codeLine: 17, // for each neighbor of node
         });
 
         dfs(neighbor);
@@ -98,6 +102,7 @@ export function dfsTopologicalSort(
       nodeId,
       message: `Finished exploring ${nodeLabel}. Pushed to stack.`,
       stack: [...stack],
+      codeLine: 22, // push node to stack S
     });
   }
 
@@ -110,6 +115,7 @@ export function dfsTopologicalSort(
         nodeId: node.id,
         message: `Starting DFS from unvisited node ${nodeLabel}`,
         stack: [...stack],
+        codeLine: 4, // for each node v in graph
       });
       dfs(node.id);
     }
@@ -121,6 +127,7 @@ export function dfsTopologicalSort(
       message: '⚠️ Cycle detected! Topological sort not possible.',
       result: [],
       stack: [...stack],
+      codeLine: 7, // return error (cycle detected)
     });
   } else {
     // Reverse stack to get topological order
@@ -130,6 +137,7 @@ export function dfsTopologicalSort(
       type: 'complete',
       message: `✓ DFS complete! Stack formed: ${stack.map(id => nodeMap.get(id)?.label).join(', ')}`,
       stack: [...stack],
+      codeLine: 8, // return S as topological order
     });
 
     steps.push({
@@ -137,6 +145,7 @@ export function dfsTopologicalSort(
       message: `Topological Order (reversed stack): ${result.map(id => nodeMap.get(id)?.label).join(' → ')}`,
       result,
       stack: [],
+      codeLine: 5, // reverse stack S
     });
   }
 
