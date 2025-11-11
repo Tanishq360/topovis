@@ -35,6 +35,76 @@ body {
   cursor: pointer;
 }
 
+/* ReactFlow Controls styling for dark theme */
+.react-flow__controls {
+  background: #1e293b !important;
+  border: 1px solid #334155 !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+.react-flow__controls-button {
+  background: #2563eb !important;
+  border: none !important;
+  border-bottom: 1px solid #1e40af !important;
+  width: 32px !important;
+  height: 32px !important;
+  padding: 6px !important;
+  color: #ffffff !important;
+}
+
+.react-flow__controls-button:last-child {
+  border-bottom: none !important;
+}
+
+.react-flow__controls-button:hover {
+  background: #475569 !important;
+}
+
+.react-flow__controls-button svg,
+.react-flow__controls-button path,
+.react-flow__controls button svg,
+.react-flow__controls button path {
+  fill: #ffffff !important;
+  stroke: #ffffff !important;
+  color: #ffffff !important;
+}
+
+/* Additional specificity for all control icons */
+.react-flow__controls > * svg,
+.react-flow__controls > * path {
+  fill: #ffffff !important;
+  stroke: none !important;
+}
+
+/* Catch-all for any nested elements */
+.react-flow__controls * {
+  color: #ffffff !important;
+}
+
+.react-flow__controls svg * {
+  fill: #ffffff !important;
+}
+
+/* Target specific control icons */
+.react-flow__controls-zoomin,
+.react-flow__controls-zoomout,
+.react-flow__controls-fitview,
+.react-flow__controls-interactive {
+  background: #2563eb !important;
+}
+
+.react-flow__controls-zoomin svg,
+.react-flow__controls-zoomout svg,
+.react-flow__controls-fitview svg,
+.react-flow__controls-interactive svg,
+.react-flow__controls-zoomin path,
+.react-flow__controls-zoomout path,
+.react-flow__controls-fitview path,
+.react-flow__controls-interactive path {
+  fill: #ffffff !important;
+}
+
 .react-flow__handle {
   width: 8px;
   height: 8px;
@@ -44,6 +114,87 @@ body {
 
 .react-flow__handle:hover {
   background: #3b82f6;
+}
+
+/* Ensure edges are visible */
+.react-flow__edge-path {
+  stroke: #94a3b8 !important;
+  stroke-width: 2 !important;
+  fill: none !important;
+}
+
+.react-flow__edge {
+  pointer-events: all !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+.react-flow__edges {
+  z-index: 1000 !important;
+  position: relative !important;
+}
+
+/* Ensure markers (arrows) are visible */
+.react-flow__arrowhead {
+  fill: #f59e0b !important;
+}
+
+.react-flow__edge .react-flow__edge-path {
+  stroke: #94a3b8 !important;
+  stroke-dasharray: none !important;
+}
+
+/* Make sure edge container is visible */
+svg.react-flow__edges {
+  overflow: visible !important;
+}
+
+/* Marker definitions */
+marker {
+  overflow: visible !important;
+}
+
+/* Make edges clearly visible with proper styling - clean and thin like reference */
+.react-flow__edge path {
+  stroke: #94a3b8 !important;
+  stroke-width: 2px !important;
+  fill: none !important;
+  opacity: 0.9 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Force all edge paths to be visible */
+path[class*="edge"] {
+  stroke: #94a3b8 !important;
+  stroke-width: 2px !important;
+  opacity: 0.9 !important;
+  visibility: visible !important;
+  display: block !important;
+}
+
+/* Ensure ReactFlow paths render */
+.react-flow path {
+  fill: none !important;
+  opacity: 0.9 !important;
+}
+
+/* Target the edge group specifically */
+g.react-flow__edge path {
+  stroke: #94a3b8 !important;
+  stroke-width: 2px !important;
+  fill: none !important;
+  opacity: 0.9 !important;
+  visibility: visible !important;
+}
+
+/* Force edge rendering during drag */
+.react-flow__edge.updating path,
+.react-flow__edge.selected path {
+  stroke: #94a3b8 !important;
+  stroke-width: 2px !important;
+  opacity: 0.9 !important;
+  visibility: visible !important;
 }
 
 /* Glow animation */
@@ -72,4 +223,15 @@ body {
 
 .pulse-animation {
   animation: pulse 1s ease-in-out infinite;
+}
+
+/* Delete mode edge hover effects */
+.hover-delete-edge:hover path {
+  stroke: #ef4444 !important;
+  stroke-width: 3px !important;
+  filter: drop-shadow(0 0 4px rgba(239, 68, 68, 0.6));
+}
+
+.hover-delete-edge:hover marker path {
+  fill: #ef4444 !important;
 }

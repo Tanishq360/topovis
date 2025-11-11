@@ -2,17 +2,18 @@ import { useState, useCallback, useEffect, useMemo } from 'react';
 import ReactFlow, {
   Node,
   Edge,
-  addEdge,
-  Connection,
   useNodesState,
   useEdgesState,
   Controls,
   Background,
   BackgroundVariant,
   MarkerType,
+  ConnectionMode,
+  ReactFlowProvider,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { CustomNode } from './components/CustomNode';
+import { SmartEdge } from './components/SmartEdge';
 import { ControlPanel } from './components/ControlPanel';
 import { LogPanel } from './components/LogPanel';
 import { HelpModal } from './components/HelpModal';
@@ -30,6 +31,10 @@ const nodeTypes = {
   custom: CustomNode,
 };
 
+const edgeTypes = {
+  smart: SmartEdge,
+};
+
 function App() {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -43,6 +48,8 @@ function App() {
   const [nodeCounter, setNodeCounter] = useState(0);
   const [deleteMode, setDeleteMode] = useState(false);
   const [showPseudocode, setShowPseudocode] = useState(false);
+  const [edgeMode, setEdgeMode] = useState(false);
+  const [selectedNodeForEdge, setSelectedNodeForEdge] = useState<string | null>(null);
 
   const nodeLabels = useMemo(() => {
     const map = new Map<string, string>();
@@ -182,14 +189,80 @@ function App() {
     }
   }, [currentStep, steps, applyStep, runAlgorithm]);
 
-  // Handle node click in delete mode
+  // Handle node click in delete mode or edge mode
   const handleNodeClick = useCallback((event: React.MouseEvent, node: Node) => {
+    event.stopPropagation();
+    
     if (deleteMode) {
-      event.stopPropagation();
       setNodes((nds) => nds.filter((n) => n.id !== node.id));
       setEdges((eds) => eds.filter((e) => e.source !== node.id && e.target !== node.id));
+    } else if (edgeMode) {
+      if (selectedNodeForEdge === null) {
+        // First node selected
+        setSelectedNodeForEdge(node.id);
+      } else if (selectedNodeForEdge === node.id) {
+        // Same node clicked again, deselect
+        setSelectedNodeForEdge(null);
+      } else {
+        // Second node selected, create edge
+        const source = selectedNodeForEdge;
+        const target = node.id;
+        
+        // Check if edge already exists
+        const edgeExists = edges.some(e => e.source === source && e.target === target);
+        
+        if (!edgeExists) {
+          const newEdge: Edge = {
+            id: `e${source}-${target}`,
+            source,
+            target,
+            animated: false,
+            style: { 
+              stroke: '#94a3b8', 
+              strokeWidth: 2
+            },
+            markerEnd: { 
+              type: MarkerType.ArrowClosed, 
+              color: '#f59e0b', 
+              width: 16, 
+              height: 16
+            },
+            type: 'smart',
+            data: { deleteMode: false },
+          } as Edge;
+          
+          setEdges((eds) => [...eds, newEdge]);
+          
+          // Update in-degrees
+          setTimeout(() => {
+            const inDegrees = calculateInDegrees(
+              nodes.map(n => ({
+                id: n.id,
+                label: n.data.label,
+                state: 'unvisited',
+                inDegree: 0,
+                position: n.position,
+              })),
+              [...edges, newEdge]
+            );
+            
+            setNodes((nds) =>
+              nds.map((n) => ({
+                ...n,
+                data: {
+                  ...n.data,
+                  inDegree: inDegrees[n.id] || 0,
+                },
+              }))
+            );
+          }, 0);
+        }
+        
+        // Reset selection
+        setSelectedNodeForEdge(null);
+      }
     }
-  }, [deleteMode, setNodes, setEdges]);
+  }, [deleteMode, edgeMode, selectedNodeForEdge, setNodes, setEdges, edges, nodes]);
 
   // Handle edge click in delete mode
   const handleEdgeClick = useCallback((event: React.MouseEvent, edge: Edge) => {
@@ -202,7 +275,20 @@ function App() {
   // Toggle delete mode
   const toggleDeleteMode = useCallback(() => {
     setDeleteMode((prev) => !prev);
-  }, []);
+    if (!deleteMode) {
+      setEdgeMode(false);
+      setSelectedNodeForEdge(null);
+    }
+  }, [deleteMode]);
+
+  // Toggle edge mode
+  const toggleEdgeMode = useCallback(() => {
+    setEdgeMode((prev) => !prev);
+    setSelectedNodeForEdge(null);
+    if (!edgeMode) {
+      setDeleteMode(false);
+    }
+  }, [edgeMode]);
 
   // Step backward
   const stepBackward = useCallback(() => {
@@ -323,8 +409,18 @@ function App() {
       source: edge.source,
       target: edge.target,
       animated: false,
-      style: { stroke: '#94a3b8', strokeWidth: 2.5 },
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8', width: 25, height: 25 },
+      style: { 
+        stroke: '#94a3b8', 
+        strokeWidth: 2
+      },
+      markerEnd: { 
+        type: MarkerType.ArrowClosed, 
+        color: '#f59e0b', 
+        width: 16, 
+        height: 16
+      },
+      type: 'smart',
+      data: { deleteMode: false },
     }));
 
     setNodes(flowNodes);
@@ -361,8 +457,18 @@ function App() {
       source: edge.source,
       target: edge.target,
       animated: false,
-      style: { stroke: '#94a3b8', strokeWidth: 2.5 },
-      markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8', width: 25, height: 25 },
+      style: { 
+        stroke: '#94a3b8', 
+        strokeWidth: 2
+      },
+      markerEnd: { 
+        type: MarkerType.ArrowClosed, 
+        color: '#f59e0b', 
+        width: 16, 
+        height: 16
+      },
+      type: 'smart',
+      data: { deleteMode: false },
     }));
 
     setNodes(flowNodes);
@@ -375,49 +481,6 @@ function App() {
     setSteps([]);
     setTopologicalOrder([]);
   }, [setNodes, setEdges]);
-
-  // Handle edge connection
-  const onConnect = useCallback(
-    (connection: Connection) => {
-      if (deleteMode) return; // Don't add edges in delete mode
-      setEdges((eds) => {
-        const newEdge: Edge = {
-          ...connection,
-          id: `e${connection.source}-${connection.target}`,
-          animated: false,
-          style: { stroke: '#94a3b8', strokeWidth: 2.5 },
-          markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8', width: 25, height: 25 },
-        } as Edge;
-        
-        // Update in-degrees after adding edge
-        setTimeout(() => {
-          const inDegrees = calculateInDegrees(
-            nodes.map(n => ({
-              id: n.id,
-              label: n.data.label,
-              state: 'unvisited',
-              inDegree: 0,
-              position: n.position,
-            })),
-            [...eds, newEdge].map(e => ({ id: e.id!, source: e.source!, target: e.target! }))
-          );
-
-          setNodes((nds) =>
-            nds.map((node) => ({
-              ...node,
-              data: {
-                ...node.data,
-                inDegree: inDegrees[node.id] || 0,
-              },
-            }))
-          );
-        }, 0);
-        
-        return addEdge(newEdge, eds);
-      });
-    },
-    [setEdges, nodes, edges, setNodes, deleteMode]
-  );
 
   // Handle export
   const handleExport = useCallback(() => {
@@ -482,8 +545,18 @@ function App() {
               source: edge.source,
               target: edge.target,
               animated: false,
-              style: { stroke: '#94a3b8', strokeWidth: 2.5 },
-              markerEnd: { type: MarkerType.ArrowClosed, color: '#94a3b8', width: 25, height: 25 },
+              style: { 
+                stroke: '#94a3b8', 
+                strokeWidth: 2
+              },
+              markerEnd: { 
+                type: MarkerType.ArrowClosed, 
+                color: '#f59e0b', 
+                width: 16, 
+                height: 16
+              },
+              type: 'smart',
+              data: { deleteMode: false },
             }));
 
             setNodes(flowNodes);
@@ -503,7 +576,8 @@ function App() {
   }, [setNodes, setEdges, handleReset]);
 
   return (
-    <div className="h-screen flex flex-col bg-dark-bg">
+    <ReactFlowProvider>
+      <div className="h-screen flex flex-col bg-dark-bg">
       {/* Header */}
       <header className="bg-dark-card border-b border-dark-border px-4 py-3">
         <div className="flex items-center justify-between">
@@ -524,6 +598,8 @@ function App() {
             isPlaying={isPlaying}
             speed={speed}
             deleteMode={deleteMode}
+            edgeMode={edgeMode}
+            selectedNodeForEdge={selectedNodeForEdge}
             onAlgorithmChange={setAlgorithm}
             onPlay={() => {
               if (steps.length === 0) {
@@ -544,6 +620,7 @@ function App() {
             onImport={handleImport}
             onHelp={() => setShowHelp(true)}
             onToggleDeleteMode={toggleDeleteMode}
+            onToggleEdgeMode={toggleEdgeMode}
             disabled={nodes.length === 0}
             canStepBack={currentStep > -1}
           />
@@ -551,30 +628,63 @@ function App() {
 
         {/* Center Panel - Graph Canvas */}
         <div className="flex-1 flex flex-col gap-3 min-w-0">
-          <div className="flex-1 bg-dark-card border border-dark-border rounded-lg overflow-hidden min-h-0">
+          <div className="flex-1 bg-dark-card border border-dark-border rounded-lg overflow-hidden min-h-0" style={{ minHeight: '400px', width: '100%' }}>
             <ReactFlow
               nodes={nodes.map(node => ({
                 ...node,
                 data: {
                   ...node.data,
                   deleteMode,
+                  edgeMode,
+                  isSelectedForEdge: edgeMode && selectedNodeForEdge === node.id,
                 },
               }))}
               edges={edges.map(edge => ({
                 ...edge,
                 style: {
-                  ...edge.style,
+                  stroke: deleteMode ? '#94a3b8' : '#94a3b8',
+                  strokeWidth: 2,
                   cursor: deleteMode ? 'pointer' : 'default',
+                  transition: 'all 0.2s ease',
                 },
-                className: deleteMode ? 'hover:!stroke-red-500 hover:!stroke-[3px] transition-all' : '',
+                markerEnd: {
+                  type: MarkerType.ArrowClosed,
+                  color: '#f59e0b',
+                  width: 16,
+                  height: 16,
+                },
+                type: 'smart',
+                animated: false,
+                className: deleteMode ? 'hover-delete-edge' : '',
+                hidden: false,
+                data: { deleteMode },
               }))}
               onNodesChange={onNodesChange}
               onEdgesChange={onEdgesChange}
-              onConnect={onConnect}
               onNodeClick={handleNodeClick}
               onEdgeClick={handleEdgeClick}
               nodeTypes={nodeTypes}
+              edgeTypes={edgeTypes}
+              defaultEdgeOptions={{
+                style: { stroke: '#94a3b8', strokeWidth: 2 },
+                markerEnd: { type: MarkerType.ArrowClosed, color: '#f59e0b', width: 16, height: 16 },
+                type: 'smart',
+              }}
+              connectionMode={ConnectionMode.Loose}
+              elevateEdgesOnSelect={false}
+              proOptions={{ hideAttribution: true }}
+              elementsSelectable={true}
+              nodesConnectable={false}
+              nodesDraggable={true}
+              autoPanOnNodeDrag={true}
+              zoomOnScroll={true}
+              panOnScroll={false}
+              snapToGrid={false}
+              deleteKeyCode={null}
+              edgesUpdatable={false}
+              edgesFocusable={false}
               fitView
+              fitViewOptions={{ padding: 0.2 }}
               minZoom={0.5}
               maxZoom={2}
             >
@@ -652,8 +762,9 @@ function App() {
       </div>
 
       {/* Help Modal */}
-      <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />
+      {showHelp && <HelpModal isOpen={showHelp} onClose={() => setShowHelp(false)} />}
     </div>
+    </ReactFlowProvider>
   );
 }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Handle, Position, NodeProps } from 'reactflow';
+import { NodeProps, Handle, Position } from 'reactflow';
 import { motion } from 'framer-motion';
 import { NodeState } from '../types';
 
@@ -9,6 +9,8 @@ interface CustomNodeData {
   inDegree?: number;
   showInDegree?: boolean;
   deleteMode?: boolean;
+  edgeMode?: boolean;
+  isSelectedForEdge?: boolean;
 }
 
 const stateColors: Record<NodeState, string> = {
@@ -27,13 +29,40 @@ const stateGlow: Record<NodeState, string> = {
 
 export const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data }) => {
   return (
-    <motion.div
-      className="relative"
-      initial={{ scale: 0 }}
-      animate={{ scale: 1 }}
-      transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-    >
-      <Handle type="target" position={Position.Top} />
+    <div className="relative">
+      {/* Invisible centered handles - SmartEdge will calculate optimal connection points */}
+      <Handle
+        type="target"
+        position={Position.Top}
+        isConnectable={false}
+        style={{ 
+          opacity: 0, 
+          pointerEvents: 'none',
+          background: 'transparent',
+          border: 'none',
+          width: 1,
+          height: 1,
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
+      <Handle
+        type="source"
+        position={Position.Top}
+        isConnectable={false}
+        style={{ 
+          opacity: 0, 
+          pointerEvents: 'none',
+          background: 'transparent',
+          border: 'none',
+          width: 1,
+          height: 1,
+          left: '50%',
+          top: '50%',
+          transform: 'translate(-50%, -50%)',
+        }}
+      />
       
       <motion.div
         className={`
@@ -42,14 +71,20 @@ export const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data }) => {
           ${stateColors[data.state]}
           ${stateGlow[data.state]}
           ${data.deleteMode ? 'cursor-pointer hover:!bg-red-600 hover:!border-red-500 hover:ring-4 hover:ring-red-400/50' : ''}
+          ${data.edgeMode ? 'cursor-pointer hover:ring-4 hover:ring-blue-400/50' : 'cursor-default'}
+          ${data.isSelectedForEdge ? 'ring-4 ring-blue-400 !border-blue-300' : ''}
           transition-all duration-300
         `}
+        initial={{ scale: 0 }}
         animate={{
           scale: data.state === 'processing' ? [1, 1.1, 1] : 1,
         }}
         transition={{
-          duration: 1,
+          duration: data.state === 'processing' ? 1 : 0.3,
           repeat: data.state === 'processing' ? Infinity : 0,
+          type: 'spring',
+          stiffness: 300,
+          damping: 20
         }}
       >
         {data.label}
@@ -65,8 +100,6 @@ export const CustomNode: React.FC<NodeProps<CustomNodeData>> = ({ data }) => {
           {data.inDegree ?? 0}
         </motion.div>
       )}
-
-      <Handle type="source" position={Position.Bottom} />
-    </motion.div>
+    </div>
   );
 };

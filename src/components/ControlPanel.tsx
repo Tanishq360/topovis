@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Play, Pause, RotateCcw, Plus, Shuffle, Upload, Download, Info, SkipForward, SkipBack, Trash2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, Plus, Shuffle, Upload, Download, Info, SkipForward, SkipBack, Trash2, Link } from 'lucide-react';
 import { Algorithm } from '../types';
 
 interface ControlPanelProps {
@@ -8,6 +8,8 @@ interface ControlPanelProps {
   isPlaying: boolean;
   speed: number;
   deleteMode: boolean;
+  edgeMode: boolean;
+  selectedNodeForEdge: string | null;
   onAlgorithmChange: (algo: Algorithm) => void;
   onPlay: () => void;
   onPause: () => void;
@@ -22,6 +24,7 @@ interface ControlPanelProps {
   onImport: () => void;
   onHelp: () => void;
   onToggleDeleteMode: () => void;
+  onToggleEdgeMode: () => void;
   disabled?: boolean;
   canStepBack?: boolean;
 }
@@ -31,6 +34,8 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   isPlaying,
   speed,
   deleteMode,
+  edgeMode,
+  selectedNodeForEdge,
   onAlgorithmChange,
   onPlay,
   onPause,
@@ -45,6 +50,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
   onImport,
   onHelp,
   onToggleDeleteMode,
+  onToggleEdgeMode,
   disabled = false,
   canStepBack = false,
 }) => {
@@ -160,11 +166,23 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
         <div className="flex flex-col gap-2">
           <button
             onClick={onAddNode}
-            disabled={isPlaying || deleteMode}
+            disabled={isPlaying || deleteMode || edgeMode}
             className="bg-purple-600 hover:bg-purple-700 disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded flex items-center justify-center gap-2 transition-colors"
           >
             <Plus size={18} />
             Add Node
+          </button>
+          <button
+            onClick={onToggleEdgeMode}
+            disabled={isPlaying}
+            className={`${
+              edgeMode
+                ? 'bg-blue-600 hover:bg-blue-700 ring-2 ring-blue-400'
+                : 'bg-gray-600 hover:bg-gray-700'
+            } disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded flex items-center justify-center gap-2 transition-all`}
+          >
+            <Link size={18} />
+            {edgeMode ? (selectedNodeForEdge ? '✓ Select 2nd Node' : '✓ Select 1st Node') : 'Edge Mode'}
           </button>
           <button
             onClick={onToggleDeleteMode}
@@ -180,7 +198,7 @@ export const ControlPanel: React.FC<ControlPanelProps> = ({
           </button>
           <button
             onClick={onGenerateRandom}
-            disabled={isPlaying || deleteMode}
+            disabled={isPlaying || deleteMode || edgeMode}
             className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-600 text-white font-medium py-2 px-4 rounded flex items-center justify-center gap-2 transition-colors"
           >
             <Shuffle size={18} />
